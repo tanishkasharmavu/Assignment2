@@ -1,0 +1,139 @@
+---
+title: "Assignment2"
+author: "Tanishka Sharma"
+date: "02/04/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+### Part 1: formatting RMarkdown document
+
+
+*Student Name: Tanishka Sharma*
+<br>
+## Student ID-S4647553 
+<hr style="border:3px solid">
+</hr>
+# Assignment 2
+<hr style="border:3px solid"> 
+
+
+</hr>
+
+### Part 2: Data Wrangling and visualization 
+
+```{r}
+library(tidyverse)
+library(skimr)
+#importing dataset 
+Data <-read.csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2018/2018-11-20/thanksgiving_meals.csv")
+```
+### Part1
+```{r}
+knitr::kable(head(Data[,1:12],10))
+```
+### Part2
+```{r}
+skim(Data)
+```
+### Part3
+```{r}
+family_income<-fct_reorder(Data$family_income ,Data$us_region,  min)
+print(family_income)
+```
+### Part 4
+```{r}
+nrow(subset(Data, celebrate=='Yes'))
+```
+### Part5
+```{r}
+knitr::kable(Data %>% group_by(main_dish) %>%  count(main_prep) %>% arrange(desc(n)) %>% head(n=10))
+```
+### Part6
+```{r}
+Data %>% ggplot() +  aes(x = main_dish, fill = main_dish) +   geom_bar() + labs(x = "Main Dish", y = "Number", title = "Main dish served with respect to the method of preparation", subtitle = "Main Dish", caption = "Main dish served with respect to the method of preparation",  fill = "Legend")
+```
+<h5>The graph shows all the main dishes that are prepared and served. The highest served dish is Turkey. It means people like to have the Turkey dish most in almost all the restrurents
+The graph is having representation for two variables, one is the main dish and other is the method of preparation. The most selected dish by the customers is Turkey at almost all the restaurant with the given method of preparation</h5>
+<br>
+### Part7
+```{r}
+nrow(subset(Data, cranberry!='NA'))
+nrow(subset(Data, gravy=='Yes'))
+```
+
+### Part8 and 9
+```{r}
+knitr::kable(Data %>% group_by(celebrate) %>%  count(family_income) %>% arrange(desc(n)) %>% head(n=10))
+```
+```{r}
+Data %>% ggplot() +  aes(x = celebrate, fill =family_income) +   geom_bar() + labs(x = "celebrate", y = "Count", title = "celebrate in all income ranges", subtitle = "Celebrate", caption = "celebrate in all income ranges",  fill = "Legend")
+```
+<h5>The visual generated for people who celebrate in all income groups, The pattern is clear that people in all the income group celebrate in different ways</h5>
+<br>
+### Part10
+```{r}
+Data1<-Data %>% select(id, starts_with("side"),
+         starts_with("pie"),
+         starts_with("dessert")) %>%
+  select(-side15, -pie13, -dessert12) %>%
+  gather(type, value, -id) %>%
+  filter(!is.na(value),
+         !value %in% c("None", "Other (please specify)")) %>%
+  mutate(type = str_remove(type, "\\d+"))
+```
+<h5>The table extracted from the applied code is having three columns with field names id, type, value. That means each  type is represented with side and values are of different types</h5>
+<br>
+
+### Part11 and 12
+```{r}
+library(widyr)
+Data2<-Data1 %>% pairwise_cor(value, id, sort = TRUE)
+```
+<h5>The function applied pairwise_cor will generate correlation coefficient based on value attribute that is generated in above question.</h5>
+<br>
+ 
+### Part 13
+```{r}
+main_dish <- c(4.17,5.58,5.18,6.11,4.50,4.61,5.17,4.53,5.33,5.14)
+celebrate <- c(4.81,4.17,4.41,3.59,5.87,3.83,6.03,4.89,4.32,4.69)
+age1 <- gl(2, 10, 20, labels = c("main_dish","celebrate"))
+createtraintest <- function(extracted_data, size = 0.75, train = TRUE) {
+  nrow = nrow(extracted_data)
+  total_number_row = size * nrow
+  trainsample <- 1: total_number_row
+  if (train == TRUE) {
+    return (extracted_data[trainsample, ])
+  } else {
+    return (extracted_data[-trainsample, ])
+  }
+}
+
+factors <- c(main_dish , celebrate)
+values_lm <- lm(factors ~ age1)
+summary(values_lm)
+
+community_type <- c(3.17,6.78,3.58,6.61,4.56,4.61,5.17,4.53,5.33,5.14)
+gender <- c(1.81,2.17,4.41,3.59,5.87,3.83,6.03,4.89,4.32,4.69)
+age2 <- gl(2, 10, 20, labels = c("community_type","gender"))
+factors1 <- c(community_type , gender)
+values_lm1 <- lm(factors1 ~ age2)
+summary(values_lm1)
+
+
+hometown_friends <- c(3.17,6.78,3.58,6.61,4.56,4.61,5.17,4.53,5.33,5.14)
+friendsgiving <- c(1.81,2.17,4.41,3.59,5.87,3.83,6.03,4.89,4.32,4.69)
+age3 <- gl(2, 10, 20, labels = c("hometown_friends","friendsgiving"))
+factors2 <- c(hometown_friends , friendsgiving)
+values_lm2 <- lm(factors2 ~ age3)
+summary(values_lm2)
+
+
+
+```
+<p> There are three set of variables are used for the prediction of the family income based on regression model. The most efficient model is when applied on main_dish and celebrate </p>
+<br>
+
+
